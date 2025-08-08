@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <title>台灣年假比例計算器</title>
+</head>
+<body>
+  <h2>台灣週年制年假比例計算</h2>
+
+  <label for="startDate">到職日期：</label>
+  <input type="date" id="startDate"><br><br>
+
+  <label for="endDate">離職日期：</label>
+  <input type="date" id="endDate"><br><br>
+
+  <label for="hoursPerDay">每日工時（小時）：</label>
+  <input type="number" id="hoursPerDay" value="8"><br><br>
+
+  <button onclick="calculateLeave()">計算</button>
+
+  <h3>結果：</h3>
+  <p id="result"></p>
+
+  <script>
+    function calculateLeave() {
+      const start = new Date(document.getElementById('startDate').value);
+      const end = new Date(document.getElementById('endDate').value);
+      const hoursPerDay = parseFloat(document.getElementById('hoursPerDay').value);
+
+      if (!start || !end || isNaN(hoursPerDay)) {
+        document.getElementById('result').innerText = "請正確填入所有欄位。";
+        return;
+      }
+
+      if (end <= start) {
+        document.getElementById('result').innerText = "離職日期需晚於到職日期。";
+        return;
+      }
+
+      const years = end.getFullYear() - start.getFullYear();
+      const anniversaryStart = new Date(start);
+      anniversaryStart.setFullYear(start.getFullYear() + years);
+
+      if (anniversaryStart > end) {
+        anniversaryStart.setFullYear(anniversaryStart.getFullYear() - 1);
+      }
+
+      const anniversaryEnd = new Date(anniversaryStart);
+      anniversaryEnd.setFullYear(anniversaryEnd.getFullYear() + 1);
+
+      const msPerDay = 1000 * 60 * 60 * 24;
+      const actualDays = Math.floor((end - anniversaryStart) / msPerDay) + 1;
+      const fullYearDays = Math.floor((anniversaryEnd - anniversaryStart) / msPerDay);
+
+      const ratio = actualDays / fullYearDays;
+      const fullLeaveDays = 15;
+      const proportionLeaveDays = (fullLeaveDays * ratio).toFixed(2);
+      const proportionLeaveHours = (proportionLeaveDays * hoursPerDay).toFixed(2);
+
+      document.getElementById('result').innerText = `
+        最後一個週年期間：${anniversaryStart.toISOString().split('T')[0]} ～ ${anniversaryEnd.toISOString().split('T')[0]}
+        
+實際在職天數：${actualDays} 天
+        
+應得特休比例：${proportionLeaveDays} 天（約 ${proportionLeaveHours} 小時）
+      `;
+    }
+  </script>
+</body>
+</html>
